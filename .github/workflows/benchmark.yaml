@@ -1,10 +1,16 @@
 name: Benchmark
 
 on:
-  pull_request_target:
-    branches: 
-      - main
-      - dev
+  workflow_run:
+    workflows: [Test Coverage]
+    types:
+      - completed
+
+#on:
+  #pull_request_target:
+    #branches: 
+      #- main
+      #- dev
 
 jobs:
   benchmark_sv1_criterion_with_bencher:
