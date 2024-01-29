@@ -9,7 +9,7 @@ on:
 jobs:
     track_sv1_criterion_with_bencher:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-      name: Track sv1 criterion benchmarks with Bencher
+      #name: Track sv1 criterion benchmarks with Bencher
       runs-on: ubuntu-latest
       env:
         BENCHER_PROJECT: stratum
