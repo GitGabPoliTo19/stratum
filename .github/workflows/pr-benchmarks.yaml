@@ -1,6 +1,11 @@
 name: Run and Cache Benchmarks
 
-on: pull_request
+on: 
+  pull_request:
+    branches:
+      - main
+      - dev
+      - fix-bencher
 
 jobs:
   benchmark_sv1_criterion:
