@@ -5,7 +5,7 @@ on:
     workflows: [Run and Cache Benchmarks]
     types:
      - completed
-  
+
 jobs:
   track_sv1_criterion_with_bencher:
     name: Track sv1 criterion benchmarks with Bencher
