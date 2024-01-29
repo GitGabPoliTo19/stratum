@@ -8,9 +8,10 @@ on:
 
 jobs:
   track_sv1_criterion_with_bencher:
-    name: Track sv1 criterion benchmarks with Bencher
+    if: github.event.workflow_run.conclusion == 'success'
+    #name: Track sv1 criterion benchmarks with Bencher
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
     env:
       BENCHER_PROJECT: stratum
       #BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
