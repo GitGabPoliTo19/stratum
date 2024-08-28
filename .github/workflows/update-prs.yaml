@@ -1,4 +1,4 @@
-name: Auto Update Approved PRs with Conflict Handling
+name: Auto Update Approved PRs with Conflicts Handling
 
 on:
   push:
