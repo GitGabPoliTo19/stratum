@@ -1,4 +1,4 @@
-name: Rebase Open PRs on Main Update
+name: Rebase Ope PRs on Main Update
 
 on:
   push:
