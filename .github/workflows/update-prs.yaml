@@ -65,6 +65,8 @@ jobs:
             echo "Updating PR #$pr..."
 
             # Aggiungi il remote del fork del contributore
+            print=$(gh pr view $pr --json)
+            echo $print
             fork_url=$(gh pr view $pr --json headRepository --jq '.headRepository.url')
             echo $fork_url
             git remote add contributor-fork ${fork_url}.git
