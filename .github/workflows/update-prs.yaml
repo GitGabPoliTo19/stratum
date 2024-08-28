@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Sleep for 10 seconds
-        run: sleep 10
 
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -67,7 +65,7 @@ jobs:
             echo "Updating PR #$pr..."
 
             # Aggiungi il remote del fork del contributore
-            fork_url=$(gh pr view $pr --json repository --jq '.repository.url')
+            fork_url=$(gh pr view $pr --json headRepository --jq '.headRepository.url')
             git remote add contributor-fork ${fork_url}.git
 
             # Recupera i dati del fork
@@ -91,7 +89,7 @@ jobs:
             echo "Successfully rebased and pushed PR #$pr"
           done < approved_pr_numbers.txt
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Complete Workflow
         if: always()
