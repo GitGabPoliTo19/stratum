@@ -65,7 +65,7 @@ jobs:
             echo "Updating PR #$pr..."
 
             # Aggiungi il remote del fork del contributore
-            print=$(gh pr view $pr --json headRepository)
+            print=$(gh pr view <numero-pr> --json additions,assignees,author,autoMergeRequest,baseRefName,body,changedFiles,closed,closedAt,comments,commits,createdAt,deletions,files,fullDatabaseId,headRefName,headRefOid,headRepository,headRepositoryOwner,id,isCrossRepository,isDraft,labels,latestReviews,maintainerCanModify,mergeCommit,mergeStateStatus,mergeable,mergedAt,mergedBy,milestone,number,potentialMergeCommit,projectCards,projectItems,reactionGroups,reviewDecision,reviewRequests,reviews,state,statusCheckRollup,title,updatedAt,url)
             echo $print
             fork_url=$(gh pr view $pr --json headRepository --jq '.headRepository.url')
             echo $fork_url
