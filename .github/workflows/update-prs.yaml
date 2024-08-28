@@ -1,0 +1,40 @@
+name: Rebase Open PRs on Main Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Get all open PRs
+        id: get_prs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --state open --json number,headRefName,baseRefName,isDraft,mergeable --jq '.[] | select(.baseRefName == "main" and .mergeable == "MERGEABLE") | .number' > pr_numbers.txt
+          echo "List of PRs:"
+          cat pr_numbers.txt
+        
+      - name: Rebase each PR
+        run: |
+          for pr in $(cat pr_numbers.txt); do
+            echo "Rebasing PR #$pr"
+            git fetch origin pull/$pr/head:pr-$pr
+            git checkout pr-$pr
+            print=$(git remote -v)
+            echo $print
+            git rebase origin/main
+            git push origin pr-$pr -f
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
