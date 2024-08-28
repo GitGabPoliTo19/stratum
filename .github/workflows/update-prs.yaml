@@ -67,8 +67,8 @@ jobs:
             echo "Updating PR #$pr..."
             
             # Fetch PR branch and checkout
-            git fetch origin pull/$pr/head:pr-number-$pr
-            git checkout -b pr-number-$pr FETCH_HEAD
+            git fetch origin pull/$pr/head:pr-$pr
+            git checkout pr-$pr FETCH_HEAD
 
             # Rebase and push changes
             git fetch origin main
