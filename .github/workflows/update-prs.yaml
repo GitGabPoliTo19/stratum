@@ -1,42 +1,91 @@
-name: Rebase Ope PRs on Main Update
+name: Auto Update Approved PRs with Conflict Handling
 
 on:
   push:
     branches:
-      - main
+      - main  # Sostituisci con il tuo branch base se diverso
+  workflow_dispatch:
 
 jobs:
-  rebase:
+  update-pr:
     runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
 
-      - name: Set up Git
+    steps:
+      - name: Sleep for 10 seconds
+        run: sleep 10
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Necessario per operazioni di rebase
+
+      - name: Set up Git configuration
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Get all open PRs
-        id: get_prs
+
+      - name: Fetch All Branches
+        run: git fetch --all
+
+      - name: Get List of Open PRs
+        id: get_open_prs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr list --state open --json number,headRefName,baseRefName,isDraft,mergeable --jq '.[] | select(.baseRefName == "main" and .mergeable == "MERGEABLE") | .number' > pr_numbers.txt
           echo "List of PRs:"
           cat pr_numbers.txt
-        
-      - name: Rebase each PR
+
+      - name: Check PR Reviews and Handle Conflicts
+        id: check_pr_reviews_and_conflicts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          approved_pr_count=0
+          touch approved_pr_numbers.txt
           for pr in $(cat pr_numbers.txt); do
-            echo "Rebasing PR #$pr"
-            print=$(git remote -v)
-            echo $print
-            git fetch origin pull/$pr/head:pr-$pr
-            git checkout pr-$pr
-            print=$(git remote -v)
-            echo $print
-            git rebase origin/main
-            git push origin pr-$pr -f
+            echo "Checking PR #$pr..."
+            reviews=$(gh pr view $pr --json reviews --jq '.reviews[] | select(.state == "APPROVED")')
+            echo "Reviews for PR #$pr: $reviews"
+            if [ -n "$reviews" ]; then
+              echo "PR #$pr has approved reviews."
+              echo $pr >> approved_pr_numbers.txt
+              approved_pr_count=$((approved_pr_count + 1))
+            else
+              echo "PR #$pr does not have approved reviews."
+            fi
           done
+          echo "Approved PR count: $approved_pr_count"
+          echo "APPROVED_PR_COUNT=$approved_pr_count" >> $GITHUB_ENV
+
+      - name: Rebase Approved PRs on Main
+        if: env.APPROVED_PR_COUNT != '0'
+        run: |
+          echo "Approved PRs to be rebased:"
+          cat approved_pr_numbers.txt
+          while read -r pr; do
+            echo "Updating PR #$pr..."
+            
+            # Fetch PR branch and checkout
+            git fetch origin pull/$pr/head:pr-$pr
+            git checkout -b pr-$pr FETCH_HEAD
+
+            # Rebase and push changes
+            git fetch origin main
+            git rebase origin/main || (
+              echo "Rebase failed. Resolving conflicts..."
+              git rebase --abort
+              exit 1
+            )
+            
+            # Force push the rebased PR branch
+            git push --force-with-lease origin pr-$pr
+            
+            echo "Successfully rebased and pushed PR #$pr"
+          done < approved_pr_numbers.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Complete Workflow
+        if: always()
+        run: echo "PR update process completed."
