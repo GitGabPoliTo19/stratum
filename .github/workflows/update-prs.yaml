@@ -66,6 +66,7 @@ jobs:
 
             # Aggiungi il remote del fork del contributore
             fork_url=$(gh pr view $pr --json headRepository --jq '.headRepository.url')
+            echo $fork_url
             git remote add contributor-fork ${fork_url}.git
 
             # Recupera i dati del fork
@@ -84,7 +85,7 @@ jobs:
             )
 
             # Push forzato del branch rebased verso il fork del contributore
-            git push --force-with-lease contributor-fork pr-$pr
+            git push contributor-fork pr-$pr --force
             
             echo "Successfully rebased and pushed PR #$pr"
           done < approved_pr_numbers.txt
