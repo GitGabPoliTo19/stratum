@@ -29,6 +29,8 @@ jobs:
         run: |
           for pr in $(cat pr_numbers.txt); do
             echo "Rebasing PR #$pr"
+            print=$(git remote -v)
+            echo $print
             git fetch origin pull/$pr/head:pr-$pr
             git checkout pr-$pr
             print=$(git remote -v)
