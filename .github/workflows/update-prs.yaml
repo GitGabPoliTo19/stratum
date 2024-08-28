@@ -1,4 +1,4 @@
-name: Auto Update Approved PRs with Conflicts Handling
+name: Auto Update Approved PRs with Conflict Handling
 
 on:
   push:
@@ -65,26 +65,33 @@ jobs:
           cat approved_pr_numbers.txt
           while read -r pr; do
             echo "Updating PR #$pr..."
-            
-            # Fetch PR branch and checkout
-            git fetch origin pull/$pr/head:pr-$pr
-            git checkout pr-$pr FETCH_HEAD
 
-            # Rebase and push changes
+            # Aggiungi il remote del fork del contributore
+            fork_url=$(gh pr view $pr --json repository --jq '.repository.url')
+            git remote add contributor-fork ${fork_url}.git
+
+            # Recupera i dati del fork
+            git fetch contributor-fork
+
+            # Checkout del branch della PR
+            pr_branch=$(gh pr view $pr --json headRefName --jq '.headRefName')
+            git checkout -b pr-$pr contributor-fork/$pr_branch
+
+            # Rebase e push
             git fetch origin main
             git rebase origin/main || (
               echo "Rebase failed. Resolving conflicts..."
               git rebase --abort
               exit 1
             )
-            
-            # Force push the rebased PR branch
-            git push --force-with-lease origin pr-$pr
+
+            # Push forzato del branch rebased verso il fork del contributore
+            git push --force-with-lease contributor-fork pr-$pr
             
             echo "Successfully rebased and pushed PR #$pr"
           done < approved_pr_numbers.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Complete Workflow
         if: always()
