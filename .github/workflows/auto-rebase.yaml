@@ -1,0 +1,37 @@
+name: Auto Rebase
+
+on:
+  push:
+    branches:
+      - main  # Ogni volta che viene fatto un push sul branch `main`, la action viene eseguita.
+  workflow_dispatch:  # Permette di eseguire manualmente la action dal tab Actions su GitHub.
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up GitHub CLI
+        uses: actions/setup-gh@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch open pull requests
+        id: fetch_prs
+        run: |
+          gh pr list --state open --json number --jq '.[].number' > pr_numbers.txt
+
+      - name: Rebase pull requests
+        run: |
+          while read pr; do
+            echo "Rebasing PR #$pr"
+            gh pr checkout $pr
+            git fetch origin main
+            git rebase origin/main
+            git push --force-with-lease
+          done < pr_numbers.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
