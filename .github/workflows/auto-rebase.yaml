@@ -3,8 +3,8 @@ name: Auto Rebase
 on:
   push:
     branches:
-      - main  # Triggera la action quando c'è un push sul branch `main`
-  workflow_dispatch:  # Permette di eseguire manualmente la action dal tab Actions su GitHub
+      - main
+  workflow_dispatch:
 
 jobs:
   rebase:
@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Fetch completo per evitare problemi di cronologia
 
       - name: Set GH_TOKEN environment variable
         run: echo "GH_TOKEN=${GITHUB_TOKEN}" >> $GITHUB_ENV
@@ -26,13 +28,34 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug Branches
+        run: |
+          echo "Current branch: $(git branch --show-current)"
+          git remote -v
+          git branch -a
+          git log --oneline --graph --all --decorate
+          echo "Fetching latest changes from origin"
+          git fetch --all
+          git status
+
       - name: Rebase pull requests
         run: |
           while read pr; do
             echo "Rebasing PR #$pr"
             gh pr checkout $pr
             git fetch origin main
-            git rebase origin/main
+
+            # Check commit difference between PR branch and main
+            DIFF_COMMITS=$(git rev-list --count HEAD ^origin/main)
+            echo "Commits to rebase: $DIFF_COMMITS"
+
+            # Rebase and handle conflicts
+            git rebase origin/main || {
+              echo "Conflict detected. Aborting rebase and continuing."
+              git rebase --abort
+              continue
+            }
+
             git push --force-with-lease
           done < pr_numbers.txt
         env:
