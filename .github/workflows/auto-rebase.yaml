@@ -3,7 +3,7 @@ name: Auto Rebase
 on:
   push:
     branches:
-      - dev
+      - main
   workflow_dispatch:
 
 jobs:
@@ -15,20 +15,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           persist-credentials: false
-          token: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}  # Usa il token predefinito di GitHub
           fetch-depth: 0  # Fetch completo per avere tutta la cronologia
-
-      - name: Set GH_TOKEN environment variable
-        run: echo "GH_TOKEN=${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}" >> $GITHUB_ENV
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
 
       - name: Fetch open pull requests
         run: |
           gh auth setup-git
           gh pr list --state open --json number,headRepositoryOwner,headRefName --jq '.[] | "\(.number) \(.headRepositoryOwner.login) \(.headRefName)"' > pr_details.txt
         env:
-          GH_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Usa il token predefinito di GitHub
 
       - name: Rebase pull requests
         run: |
@@ -59,6 +54,9 @@ jobs:
               continue
             }
 
+            # Configure Git to use the PAT for this push operation to trigger CI
+            git remote set-url contributor https://$PAT_TOKEN@github.com/$pr_owner/$(gh repo view --json name -q '.name').git
+
             # Push the rebased branch back to the contributor's fork
             git push --force-with-lease contributor contributor-branch:$pr_branch
 
@@ -66,4 +64,5 @@ jobs:
             git remote remove contributor
           done < pr_details.txt
         env:
-          GH_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Usa il token predefinito di GitHub
+          PAT_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}  # Usa il PAT con permessi di `repo` e `workflow`
