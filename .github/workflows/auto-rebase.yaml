@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Fetch completo per evitare problemi di cronologia
+          fetch-depth: 0  # Fetch completo per avere tutta la cronologia
 
       - name: Set GH_TOKEN environment variable
         run: echo "GH_TOKEN=${GITHUB_TOKEN}" >> $GITHUB_ENV
@@ -28,19 +28,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug Branches
-        run: |
-          echo "Current branch: $(git branch --show-current)"
-          git remote -v
-          git branch -a
-          git log --oneline --graph --all --decorate
-          echo "Fetching latest changes from origin"
-          git fetch --all
-          git status
-
       - name: Rebase pull requests
         run: |
           while read pr; do
+            echo "Processing PR #$pr"
+
+            # Get PR author information
+            AUTHOR_NAME=$(gh pr view $pr --json author --jq '.author.login')
+            AUTHOR_EMAIL="$AUTHOR_NAME@users.noreply.github.com"
+
+            # Set Git author info
+            git config user.name "$AUTHOR_NAME"
+            git config user.email "$AUTHOR_EMAIL"
+
             echo "Rebasing PR #$pr"
             gh pr checkout $pr
             git fetch origin main
