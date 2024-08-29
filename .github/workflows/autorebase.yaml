@@ -19,6 +19,12 @@ jobs:
           #persist-credentials: false
           token: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+          
+      - name: Configure git
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Automatic Rebase
         uses: cirrus-actions/rebase@1.8
         with:
