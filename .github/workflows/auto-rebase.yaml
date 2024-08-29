@@ -42,6 +42,13 @@ jobs:
             # Checkout the branch from the contributor's fork
             git checkout -b contributor-branch contributor/$pr_branch
 
+            # Set the committer name and email to match the PR author
+            PR_AUTHOR_NAME=$(gh pr view $pr_number --json author --jq '.author.login')
+            PR_AUTHOR_EMAIL="${PR_AUTHOR_NAME}@users.noreply.github.com"
+
+            git config user.name "$PR_AUTHOR_NAME"
+            git config user.email "$PR_AUTHOR_EMAIL"
+
             # Rebase the branch on top of the main branch
             git fetch origin main
             git rebase origin/main || {
