@@ -8,7 +8,7 @@ on:
       - main
       - dev
   workflow_run:
-    workflows: ["Auto Rebase Github Token"]  # Nome del workflow di rebase
+    workflows: ["Auto Rebase wuth Github Token"]  # Nome del workflow di rebase
     types:
       - completed
 
