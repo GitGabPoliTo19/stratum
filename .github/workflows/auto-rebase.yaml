@@ -14,10 +14,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set GH_TOKEN environment variable
+        run: echo "GH_TOKEN=${GITHUB_TOKEN}" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Fetch open pull requests
-        id: fetch_prs
         run: |
+          gh auth setup-git
           gh pr list --state open --json number --jq '.[].number' > pr_numbers.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rebase pull requests
         run: |
@@ -29,4 +36,4 @@ jobs:
             git push --force-with-lease
           done < pr_numbers.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
