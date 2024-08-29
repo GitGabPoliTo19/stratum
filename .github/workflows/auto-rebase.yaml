@@ -3,8 +3,8 @@ name: Auto Rebase
 on:
   push:
     branches:
-      - main  # Ogni volta che viene fatto un push sul branch `main`, la action viene eseguita.
-  workflow_dispatch:  # Permette di eseguire manualmente la action dal tab Actions su GitHub.
+      - main  # Triggera la action quando c'è un push sul branch `main`
+  workflow_dispatch:  # Permette di eseguire manualmente la action dal tab Actions su GitHub
 
 jobs:
   rebase:
@@ -13,11 +13,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set up GitHub CLI
-        uses: actions/setup-gh@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch open pull requests
         id: fetch_prs
