@@ -7,6 +7,10 @@ on:
     branches:
       - main
       - dev
+  workflow_run:
+    workflows: ["Auto Rebase Github Token"]  # Nome del workflow di rebase
+    types:
+      - completed
 
 name: Rustfmt
 
