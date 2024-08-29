@@ -14,6 +14,7 @@
 # This test loops through every test in test/message-generator/test, and runs each one, collecting
 # code coverage data for anything in the roles/ directory that is relevant to SV2(pool, mining-proxy)
 
+
 name: Test Coverage
 
 on:
