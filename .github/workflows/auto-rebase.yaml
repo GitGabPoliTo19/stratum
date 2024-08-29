@@ -17,16 +17,16 @@ jobs:
           fetch-depth: 0  # Fetch completo per avere tutta la cronologia
 
       - name: Set GH_TOKEN environment variable
-        run: echo "GH_TOKEN=${GITHUB_TOKEN}" >> $GITHUB_ENV
+        run: echo "GH_TOKEN=${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
 
       - name: Fetch open pull requests
         run: |
           gh auth setup-git
           gh pr list --state open --json number,headRepositoryOwner,headRefName --jq '.[] | "\(.number) \(.headRepositoryOwner.login) \(.headRefName)"' > pr_details.txt
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
 
       - name: Rebase pull requests
         run: |
@@ -64,4 +64,4 @@ jobs:
             git remote remove contributor
           done < pr_details.txt
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
