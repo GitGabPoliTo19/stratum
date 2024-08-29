@@ -54,15 +54,18 @@ jobs:
               continue
             }
 
-            # Configure Git to use the PAT for this push operation to trigger CI
-            git remote set-url contributor https://$PAT_TOKEN@github.com/$pr_owner/$(gh repo view --json name -q '.name').git
-
             # Push the rebased branch back to the contributor's fork
             git push --force-with-lease contributor contributor-branch:$pr_branch
 
             # Remove the remote
             git remote remove contributor
+
+            # Restart the check suite for the pull request
+            PR_HEAD_SHA=$(gh pr view $pr_number --json headRefOid --jq '.headRefOid')
+            curl -X POST \
+              -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/${{ github.repository }}/check-suites/$PR_HEAD_SHA/rerequest
           done < pr_details.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Usa il token predefinito di GitHub
-          PAT_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}  # Usa il PAT con permessi di `repo` e `workflow`
