@@ -25,8 +25,7 @@ jobs:
       - name: Debug Permissions
         run: |
           echo "Token: ${{ steps.get_workflow_token.outputs.token }}"
-          curl -H "Authorization: token ${{ steps.get_workflow_token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/workflow
-
+          curl -H "Authorization: token ${{ steps.get_workflow_token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/
 
       - name: Checkout repository
         uses: actions/checkout@v4
