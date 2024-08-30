@@ -16,7 +16,7 @@ jobs:
           app_id: ${{ secrets.APP_ID}}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
           permissions: >-
-             {"pull_requests": "write", "workflows": "write"}
+             {"contents": "write", "metadata": "write", "pull_requests": "write", "workflows": "write"}
 
       - name: Debug Permissions
         run: |
