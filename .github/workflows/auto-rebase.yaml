@@ -27,7 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.generate-token.outputs.token }}
+          token: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
           fetch-depth: 0  # Fetch full history to have the entire commit history
 
       - name: Fetch open pull requests with label
@@ -35,7 +35,7 @@ jobs:
           gh auth setup-git
           gh pr list --state open --label "ready-to-be-merged" --json number,headRepositoryOwner,headRefName --jq '.[] | "\(.number) \(.headRepositoryOwner.login) \(.headRefName)"' > pr_details.txt
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
 
       - name: Rebase pull requests
         run: |
@@ -87,4 +87,4 @@ jobs:
 
           done < pr_details.txt
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
