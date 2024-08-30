@@ -1,21 +1,31 @@
-name: Slash Command Dispatch Rebase
+name: Autobase
+
 on:
-  issue_comment:
-    types: [created]
+  push:
+    branches: [main]
+# Concurrency ensures that only one instance of the workflow runs for a given pull request or check suite.
+concurrency:
+  group: autobase-${{ github.event.pull_request.number || github.event.check_suite.id }}
+  cancel-in-progress: false
+
 jobs:
-  slashCommandDispatch:
+  autobase:
     runs-on: ubuntu-latest
+    #if: (github.event.pull_request.merged == true) || (github.event.check_suite.conclusion == 'failure')
     steps:
-      - name: Get Token
-        id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v3
-        with:
-          application_id: ${{ secrets.APP_ID }}
-          application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
-      - name: Slash Command Dispatch
-        uses: peter-evans/slash-command-dispatch@v3
-        with:
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          commands: rebase
-          permission: write
-          issue-type: pull-request
+    - name: Get Token
+      id: get_workflow_token
+      uses: peter-murray/workflow-application-token-action@v3
+      with:
+        application_id: ${{ secrets.APP_ID }}
+        application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+        
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ steps.get_workflow_token.outputs.token }}
+
+    - name: Autobase
+      uses: eygraber/autobase-action@v1
+      with:
+        github-token: ${{ steps.get_workflow_token.outputs.token }}
