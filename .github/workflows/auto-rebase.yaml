@@ -3,18 +3,13 @@ name: Auto Rebase
 on:
   push:
     branches:
-      - dev
+      - main
   workflow_dispatch:
   
 jobs:
   rebase-outdated-prs:
     runs-on: ubuntu-latest
     steps:
-      #- uses: tibdex/github-app-token@v1
-        #id: generate-token
-        #with:
-          #app_id: ${{ secrets.APP_ID}}
-          #private_key: ${{ secrets.APP_PRIVATE_KEY }}
       - name: Get Token
         id: get_workflow_token
         uses: peter-murray/workflow-application-token-action@v3
@@ -25,7 +20,7 @@ jobs:
       - name: Debug Permissions
         run: |
           echo "Token: ${{ steps.get_workflow_token.outputs.token }}"
-          curl -H "Authorization: token ${{ steps.get_workflow_token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/
+          curl -H "Authorization: token ${{ steps.get_workflow_token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/workflow
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -72,6 +67,15 @@ jobs:
 
               # Post a comment on the PR to notify the author about the conflict
               gh pr comment $pr_number --body "Hey @$PR_AUTHOR_NAME, your PR cannot be rebased due to conflicts. Could you resolve them, please?"
+
+              # Remove the remote to clean up
+              git remote remove contributor
+
+              # Ensure we are not on the branch to be deleted
+              git checkout main
+
+              # Delete the local unique branch
+              git branch -D $unique_branch_name
 
               continue
             fi
