@@ -1,4 +1,4 @@
-name: Auto Rebase
+name: Auto Rebase test
 
 on:
   push:
