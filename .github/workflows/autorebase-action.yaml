@@ -3,10 +3,6 @@ name: Autobase
 on:
   push:
     branches: [main]
-# Concurrency ensures that only one instance of the workflow runs for a given pull request or check suite.
-concurrency:
-  group: autobase-${{ github.event.pull_request.number || github.event.check_suite.id }}
-  cancel-in-progress: false
 
 jobs:
   autobase:
