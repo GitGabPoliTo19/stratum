@@ -1,5 +1,4 @@
 name: Auto Rebase
-
 on:
   push:
     branches:
