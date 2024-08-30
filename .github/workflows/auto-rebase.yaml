@@ -16,7 +16,7 @@ jobs:
           #app_id: ${{ secrets.APP_ID}}
           #private_key: ${{ secrets.APP_PRIVATE_KEY }}
           #permissions: >-
-             #{"pull_requests": "write", "workflows": "write", "contents": "read"}
+          #{"pull_requests": "write", "workflows": "write", "contents": "read"}
       - name: Get Token
         id: get_workflow_token
         uses: peter-murray/workflow-application-token-action@v3
@@ -26,7 +26,7 @@ jobs:
           
       - name: Debug Permissions
         run: |
-          echo "Token: ${{ steps.generate-token.outputs.token }}"
+          echo "Token: ${{ steps.get_workflow_token.outputs.token }}"
           curl -H "Authorization: token ${{ steps.generate-token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/workflow
 
 
