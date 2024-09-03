@@ -10,22 +10,22 @@ jobs:
   rebase-outdated-prs:
     runs-on: ubuntu-latest
     steps:
-      - name: Get Token
-        id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v3
-        with:
-          application_id: ${{ secrets.APP_ID }}
-          application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+      #- name: Get Token
+        #id: get_workflow_token
+        #uses: peter-murray/workflow-application-token-action@v3
+        #with:
+          #application_id: ${{ secrets.APP_ID }}
+          #application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           
-      - name: Debug Permissions
-        run: |
-          echo "Token: ${{ steps.get_workflow_token.outputs.token }}"
-          curl -H "Authorization: token ${{ steps.get_workflow_token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/workflow
+      #- name: Debug Permissions
+        #run: |
+          #echo "Token: ${{ steps.get_workflow_token.outputs.token }}"
+          #curl -H "Authorization: token ${{ steps.get_workflow_token.outputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/permissions/workflow
 
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.get_workflow_token.outputs.token }}
+          token: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
           fetch-depth: 0  # Fetch full history to have the entire commit history
 
       - name: Fetch open pull requests with label
@@ -36,7 +36,7 @@ jobs:
           echo "PRs fetched:"
           cat pr_details.txt  # Debug: print the content of the file
         env:
-          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
 
       - name: Rebase pull requests
         run: |
@@ -60,8 +60,8 @@ jobs:
             PR_AUTHOR_NAME=$(gh pr view $pr_number --json author --jq '.author.login')
             PR_AUTHOR_EMAIL="${PR_AUTHOR_NAME}@users.noreply.github.com"
 
-            git config user.name "$PR_AUTHOR_NAME"
-            git config user.email "$PR_AUTHOR_EMAIL"
+            git config --global user.name "$PR_AUTHOR_NAME"
+            git config --global user.email "$PR_AUTHOR_EMAIL"
 
             # Rebase the branch on top of the main branch
             git fetch origin main
@@ -98,4 +98,4 @@ jobs:
 
           done < pr_details.txt
         env:
-          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITGAB_SRI_PERSONAL_TOKEN }}
